@@ -1,0 +1,51 @@
+//Z531415L JOB (SETUP),
+//             'BUILD PROGRAM LOOK',
+//             CLASS=S,NOTIFY=&SYSUID,
+//             MSGCLASS=X,
+//             MSGLEVEL=(1,1)
+//*******************************************************************
+//*                                                                 *
+//*  THIS JOB BUILDS THE TSO COMMAND LOOK AND THE MODULE CBMACSMV   *
+//*                                                                 *
+//*******************************************************************
+//ASM     PROC MOD=NOMBR
+//IFOX00  EXEC PGM=IFOX00,
+//             PARM='XREF(SHORT),LIST,DECK,NOOBJ',
+//             REGION=1024K
+//SYSTERM  DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//SYSUT1   DD  UNIT=VIO,SPACE=(CYL,(1,1))
+//SYSUT2   DD  UNIT=VIO,SPACE=(CYL,(1,1))
+//SYSUT3   DD  UNIT=VIO,SPACE=(CYL,(1,1))
+//SYSLIB   DD  DISP=SHR,DSN=SYS1.MACLIB,DCB=BLKSIZE=32720
+//         DD  DISP=SHR,DSN=SYS1.AMODGEN
+//         DD  DISP=SHR,DSN=Z531415.LOOKMVS.ASM << CHANGE >>
+//SYSPUNCH DD  DISP=(OLD,PASS),
+//             DSN=&&OBJ(&MOD)
+//SYSIN    DD  DSN=Z531415.LOOKMVS.ASM(&MOD),DISP=SHR << CHANGE >>
+//         PEND
+//*
+//IEFBR14 EXEC PGM=IEFBR14
+//SYSPUNCH DD  DISP=(,PASS),UNIT=VIO,SPACE=(CYL,(2,1,5)),
+//             DCB=(LRECL=80,BLKSIZE=3120,RECFM=FB),
+//             DSN=&&OBJ
+//*
+//ASMLOOK EXEC ASM,MOD=LOOKMVS
+//ASMCBM  EXEC ASM,MOD=CBMACSMV
+//*
+//*
+//LINK1   EXEC PGM=IEWL,
+//             REGION=1024K,
+//             COND=(0,LT),
+//             PARM='XREF,LIST,RENT,REUS'
+//SYSPRINT DD  SYSOUT=*
+//OBJ      DD  DSN=&&OBJ,DISP=(OLD,DELETE)
+//SYSUT1   DD  UNIT=VIO,SPACE=(CYL,(1,1))
+//SYSLMOD  DD  DISP=SHR,DSN=SYS2.CMDLIB
+//SYSLIN   DD  *
+ INCLUDE OBJ(LOOKMVS,CBMACSMV)
+ ENTRY LOOKMVS
+ SETCODE AC(1)
+ ALIAS LOOK
+ NAME LOOKMVS(R)
+/*
